@@ -38,7 +38,6 @@ void task_register(const char *name, uint32_t period_ms, uint32_t max_runs, void
     // TODO
     // register a task
     // !!! Check max tasks
-    printf("Init terminé: %s\n",name);
     tasks[task_count].name = name;
     tasks[task_count].period_ms = period_ms;
     tasks[task_count].max_runs = max_runs;
@@ -63,9 +62,10 @@ int main(void) {
     task_register("SensorTask", 100, 12, task_1_handler); // Runs 12 times
     task_register("LoggerTask", 500, 2, task_2_handler); // Runs 2 time
 
+
     while (true) {
 
-        for (int i = 0; i < MAX_TASKS; i++)
+        for (int i = 0; i < task_count; i++)
         {
             uint64_t current_time = get_time_ms();
             uint64_t diff_time = current_time - (tasks[i].last_run_ms);            
@@ -82,6 +82,24 @@ int main(void) {
         }
         
 
+
+        int total_count=0;
+
+        for (int i = 0; i < task_count; i++)
+        {
+            if (tasks[i].run_count == tasks[i].max_runs)
+            {
+                total_count +=1;
+            }
+            
+        }
+        
+        if (total_count == task_count)
+        {
+            printf("Fin des deux tasks, exit du code\n");
+            break;
+        }
+        
         
         
         
