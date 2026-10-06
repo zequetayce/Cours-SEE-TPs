@@ -22,15 +22,15 @@ uint64_t get_time_ms(void) {
     
     struct timespec ts;
 
-    if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) == -1) {
         perror("clock_gettime");
-        return 1;
+        return 1; //Securité à faire
     }else{
         //printf("Valeur clock nano sec: %lld\n",ts.tv_nsec);
-        return ((ts.tv_nsec/1000000));
+        return (((ts.tv_sec * 1000) + (ts.tv_nsec/1000000)));
     }
 
-
+    printf("coucocu\n");
     return 0;
 }
 
@@ -42,7 +42,7 @@ void task_register(const char *name, uint32_t period_ms, uint32_t max_runs, void
     tasks[task_count].name = name;
     tasks[task_count].period_ms = period_ms;
     tasks[task_count].max_runs = max_runs;
-    tasks[task_count].last_run_ms = get_time_ms(); //get_time_ms();
+    tasks[task_count].last_run_ms = 0;
     tasks[task_count].run_count = 0;
     tasks[task_count].func = func;
     printf("Init terminé: %s\n",name);
@@ -68,10 +68,14 @@ int main(void) {
         for (int i = 0; i < MAX_TASKS; i++)
         {
             uint64_t current_time = get_time_ms();
+            uint64_t diff_time = current_time - (tasks[i].last_run_ms);            
 
-            if ((current_time!=1) && ((current_time - tasks[i].last_run_ms) >= tasks[i].period_ms) && (tasks[i].run_count < tasks[i].max_runs))
+            if ((current_time!=1) && (diff_time >= tasks[i].period_ms) && (tasks[i].run_count < tasks[i].max_runs))
             {
-                printf("La task %s va etre executée, elle en est à %d/%d execution \n",tasks[i].name,(tasks[i].run_count)+1,tasks[i].max_runs);
+                printf("current time : %lld\n",current_time);
+                printf("tasks time:  %lld\n",tasks[i].last_run_ms);
+
+                printf("La task %s va etre executée, elle en est à %d/%d execution | Différence du temps : %lld \n",tasks[i].name,(tasks[i].run_count)+1,tasks[i].max_runs,diff_time);
                 tasks[i].last_run_ms = current_time;
                 tasks[i].run_count +=1; 
             }
